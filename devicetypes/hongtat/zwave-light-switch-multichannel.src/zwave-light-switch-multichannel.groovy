@@ -154,6 +154,10 @@ def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cm
     zwaveBinaryEvent(cmd, endpoint, "physical")
     // createEvent(name:"switch", value: cmd.value ? "on" : "off")
 }
+def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd, endpoint = null) {
+    log.debug "BasicSet() called - ${cmd} to endpoint ${endpoint}"
+    zwaveBinaryEvent(cmd, endpoint, "physical")
+}
 def zwaveBinaryEvent(cmd, endpoint, type) {
     log.debug "zwaveBinaryEvent cmd ${cmd}, endpoint ${endpoint}, type ${type}"
     def childDevice = childDevices.find{it.deviceNetworkId.endsWith("${endpoint}")}
