@@ -144,13 +144,29 @@ def parse(String description) {
     }
     result
 }
-def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
-    log.debug "BasicReport() called - ${cmd.inspect()}"
-    createEvent(name:"switch", value: cmd.value ? "on" : "off")
+def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd, endpoint = null) {
+    log.debug "BasicReport() called - ${cmd} to endpoint ${endpoint}"
+    zwaveBinaryEvent(cmd, endpoint, "digital")
+    // createEvent(name:"switch", value: cmd.value ? "on" : "off")
 }
-def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd) {
-    log.debug "SwitchBinaryReport() called - ${cmd.inspect()}"
-    createEvent(name:"switch", value: cmd.value ? "on" : "off")
+def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd, endpoint = null) {
+    log.debug "SwitchBinaryReport() called - ${cmd} to endpoint ${endpoint}"
+    zwaveBinaryEvent(cmd, endpoint, "physical")
+    // createEvent(name:"switch", value: cmd.value ? "on" : "off")
+}
+def zwaveBinaryEvent(cmd, endpoint, type) {
+    log.debug "zwaveBinaryEvent cmd ${cmd}, endpoint ${endpoint}, type ${type}"
+    def childDevice = childDevices.find{it.deviceNetworkId.endsWith("${endpoint}")}
+    def result = null
+ 
+    if (childDevice) {
+        log.debug "childDevice.sendEvent ${cmd.value}"
+        childDevice.sendEvent(name: "switch", value: cmd.value ? "on" : "off", type: type)
+    } else {
+        result = createEvent(name: "switch", value: cmd.value ? "on" : "off", type: type)
+    }
+ 
+    result
 }
 def zwaveEvent(physicalgraph.zwave.commands.powerlevelv1.PowerlevelReport cmd) {
     log.debug "PowerlevelReport() called - ${cmd.inspect()}"
